@@ -23,17 +23,17 @@ operationBtns.forEach((btn) => {
     btn.onmousedown = (e) => inputOperation(btn.dataset.operation);
 });
 
-clearAllBtn.onmousedown = (e) => {resetLogic(); resetDisplay()};
+clearAllBtn.onmousedown = (e) => reset();
 
 clearCurrentBtn.onmousedown = (e) => {
-    if (resetOnInput) {resetLogic(); resetDisplay()};
+    if (resetOnInput) reset();
 
     operand = "0";
     currentInput.innerHTML = operand;
 };
 
 eraseBtn.onmousedown = (e) => {
-    if (resetOnInput) {resetLogic(); resetDisplay()};
+    if (resetOnInput) reset();
     if (operand === "0") return;
 
     operand = (operand.length === 1 + (operand.includes("-") ? 1 : 0)) ? "0" : operand.slice(0, operand.length-1);
@@ -41,7 +41,7 @@ eraseBtn.onmousedown = (e) => {
 };
 
 negateBtn.onmousedown = (e) => {
-    if (resetOnInput) {resetLogic(); resetDisplay()};
+    if (resetOnInput) reset();
     if (operand === "0") return;
 
     operand = operand.includes("-") ? operand.slice(1) : `-${operand}`;
@@ -49,7 +49,7 @@ negateBtn.onmousedown = (e) => {
 };
 
 decimalBtn.onmousedown = (e) => {
-    if (resetOnInput) {resetLogic(); resetDisplay()};
+    if (resetOnInput) reset();
     if (operand.includes(".")) return;
 
     operand += ".";
@@ -60,47 +60,41 @@ equalBtn.onmousedown = (e) => operate();
 
 const round = (number, decPlaces) => Math.round(number * 10**decPlaces) / 10**decPlaces;
 
-const resetLogic = () => {
+const reset = () => {
     memory = "0";
     operand = "0";
     operation = null;
     resetOnInput = false;
-}
-
-const resetDisplay = () => {
     lastOperation.innerHTML = "";
     currentInput.innerHTML = operand;
 }
 
 const inputNumber = (number) => {
     if (operand.length >= 16) return;
-    if (resetOnInput) {resetLogic(); resetDisplay()};
+    if (resetOnInput) reset();
 
     operand = operand === "0" ? number : operand + number;
     currentInput.innerHTML = operand;
 };
 
 const inputOperation = (newOperation) => {
-    memory = operand;
+    if (operation === null) memory = operand;
+
     operand = "0";
     operation = newOperation;
     resetOnInput = false;
 
     lastOperation.innerHTML = `${memory} ${operation}`;
+    currentInput.innerHTML = memory;
 };
 
 const operate = () => {
     lastOperation.innerHTML = operation ? `${memory} ${operation} ${operand} = ` : `${operand} = `;
 
+    const divByZero = (operation === "/") && (+operand === 0);
     switch (operation) {
         case "/":
-            if (+operand === 0) {
-                currentInput.innerHTML = "err";
-                resetLogic();
-                resetOnInput = true;
-                return;
-            }
-            operand = +memory / +operand;
+            operand = divByZero ? 0 : +memory / +operand;
             break;
         case "*":
             operand = +memory * +operand;
@@ -117,7 +111,7 @@ const operate = () => {
     operation = null;
     resetOnInput = true;
     
-    currentInput.innerHTML = operand;
+    currentInput.innerHTML = divByZero ? "err" : operand;
 };
 
-window.onload = () => {resetLogic(); resetDisplay()};
+window.onload = () => reset();
