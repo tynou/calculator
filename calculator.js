@@ -10,7 +10,7 @@ const equalBtn = document.querySelector(".equal");
 const numberBtns = document.querySelectorAll(".number");
 const operationBtns = document.querySelectorAll(".operation");
 
-let writeNewNumber = true;
+let resetOnInput = false;
 let memory = "0";
 let operand = "0";
 let operation = null;
@@ -26,34 +26,31 @@ operationBtns.forEach((btn) => {
 clearAllBtn.onmousedown = (e) => {resetLogic(); resetDisplay()};
 
 clearCurrentBtn.onmousedown = (e) => {
-    if (!writeNewNumber) {resetLogic(); resetDisplay()};
+    if (resetOnInput) {resetLogic(); resetDisplay()};
 
     operand = "0";
-
     currentInput.innerHTML = operand;
 };
 
 eraseBtn.onmousedown = (e) => {
-    if (!writeNewNumber) {resetLogic(); resetDisplay()};
+    if (resetOnInput) {resetLogic(); resetDisplay()};
+    if (operand === "0") return;
 
-    const hasSign = operand.toString().includes("-");
-    if (operand.length === 1 + (hasSign ? 1 : 0)) {
-        operand = "0";
-    } else {
-        operand = operand.toString().slice(0,operand.toString().length-1);
-    }
+    operand = (operand.length === 1 + (operand.includes("-") ? 1 : 0)) ? "0" : operand.slice(0, operand.length-1);
     currentInput.innerHTML = operand;
 };
 
 negateBtn.onmousedown = (e) => {
+    if (resetOnInput) {resetLogic(); resetDisplay()};
     if (operand === "0") return;
 
-    operand = operand * -1;
+    operand = operand.includes("-") ? operand.slice(1) : `-${operand}`;
     currentInput.innerHTML = operand;
 };
 
 decimalBtn.onmousedown = (e) => {
-    if (operand.toString().includes(".")) return;
+    if (resetOnInput) {resetLogic(); resetDisplay()};
+    if (operand.includes(".")) return;
 
     operand += ".";
     currentInput.innerHTML = operand;
@@ -61,15 +58,13 @@ decimalBtn.onmousedown = (e) => {
 
 equalBtn.onmousedown = (e) => operate();
 
-const roundNumber = (number, decPlaces) => Math.round(number * 10**decPlaces) / 10**decPlaces;
-
-const getSigned = (number, sign, round=true) => (sign === -1 ? "-" : "") + (round ? roundNumber(number, 3) : number);
+const round = (number, decPlaces) => Math.round(number * 10**decPlaces) / 10**decPlaces;
 
 const resetLogic = () => {
     memory = "0";
     operand = "0";
     operation = null;
-    writeNewNumber = true;
+    resetOnInput = false;
 }
 
 const resetDisplay = () => {
@@ -79,9 +74,9 @@ const resetDisplay = () => {
 
 const inputNumber = (number) => {
     if (operand.length >= 16) return;
-    if (!writeNewNumber) {resetLogic(); resetDisplay()};
+    if (resetOnInput) {resetLogic(); resetDisplay()};
 
-    operand = operand === "0" ? number.toString() : operand + number;
+    operand = operand === "0" ? number : operand + number;
     currentInput.innerHTML = operand;
 };
 
@@ -89,19 +84,20 @@ const inputOperation = (newOperation) => {
     memory = operand;
     operand = "0";
     operation = newOperation;
-    writeNewNumber = true;
+    resetOnInput = false;
 
     lastOperation.innerHTML = `${memory} ${operation}`;
 };
 
 const operate = () => {
-    lastOperation.innerHTML = operation ? `${+memory} ${operation} ${+operand} = ` : `${+operand} = `;
+    lastOperation.innerHTML = operation ? `${memory} ${operation} ${operand} = ` : `${operand} = `;
 
     switch (operation) {
         case "/":
             if (+operand === 0) {
                 currentInput.innerHTML = "err";
                 resetLogic();
+                resetOnInput = true;
                 return;
             }
             operand = +memory / +operand;
@@ -116,9 +112,10 @@ const operate = () => {
             operand = +memory + +operand;
             break;
     }
+    operand = operand.toString();
 
     operation = null;
-    writeNewNumber = false;
+    resetOnInput = true;
     
     currentInput.innerHTML = operand;
 };
