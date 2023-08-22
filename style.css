@@ -117,6 +117,7 @@ button:active {
 
 .last-operation {
     min-height: 1rem;
+    max-width: 250px;
     user-select: none;
     font-family: inherit;
     font-size: var(--font-s-1);
@@ -125,6 +126,10 @@ button:active {
 }
 
 .current-input {
+    max-width: 250px;
+    /* overflow: hidden;
+    text-overflow: ellipsis; */
+    overflow-wrap: break-word;
     user-select: none;
     font-family: inherit;
     font-size: var(--font-s-3);

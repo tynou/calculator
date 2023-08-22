@@ -58,7 +58,7 @@ decimalBtn.onmousedown = (e) => {
 
 equalBtn.onmousedown = (e) => operate();
 
-const round = (number, decPlaces) => Math.round(number * 10**decPlaces) / 10**decPlaces;
+const round = (number, decPlaces=5) => Math.round(number * 10**decPlaces) / 10**decPlaces;
 
 const reset = () => {
     memory = "0";
@@ -84,12 +84,12 @@ const inputOperation = (newOperation) => {
     operation = newOperation;
     resetOnInput = false;
 
-    lastOperation.innerHTML = `${memory} ${operation}`;
+    lastOperation.innerHTML = `${round(memory)} ${operation}`;
     currentInput.innerHTML = memory;
 };
 
 const operate = () => {
-    lastOperation.innerHTML = operation ? `${memory} ${operation} ${operand} = ` : `${operand} = `;
+    lastOperation.innerHTML = operation ? `${round(memory)} ${operation} ${round(operand)} = ` : `${round(operand)} = `;
 
     const divByZero = (operation === "/") && (+operand === 0);
     switch (operation) {
